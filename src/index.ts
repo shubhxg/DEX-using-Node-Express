@@ -32,24 +32,21 @@ let ETH_BALANCE: Decimal = new Decimal(200);
 let USDC_BALANCE: Decimal = new Decimal(1000000);
 const FEES: Decimal = new Decimal(0.003); // 0.3% fees
 
-// Authentication middleware
 const authenticateToken = (req:any, res:any, next:any) => {
-  // Get the JWT token from the Authorization header
+  
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
-  // If no token is provided, return 401 Unauthorized
   if (token == null) return res.sendStatus(401);
 
   // Verify the JWT token using the secret key
   jwt.verify(token, SECRET_KEY, (err:any, user:any) => {
-    if (err) return res.sendStatus(403); // If token is invalid, return 403 Forbidden
-    req.user = user; // If token is valid, attach the user data to the request object
-    next(); // Call the next middleware function
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
   });
 };
 
-// Add liquidity (not implemented)
 app.post("/add-liquidity", authenticateToken, (req, res) => {
   res.status(501).json({ message: "Not implemented yet" });
 });
@@ -64,11 +61,11 @@ app.post("/buy-asset", authenticateToken, (req, res) => {
   }
 
   const quantityDecimal = new Decimal(quantity);
-  const product = ETH_BALANCE.mul(USDC_BALANCE); // Calculate the constant product
-  const updatedEthQuant = ETH_BALANCE.sub(quantityDecimal); // Calculate the updated ETH balance
-  const updatedUSDCBalance = product.div(updatedEthQuant); // Calculate the updated USDC balance
-  const paidAmount = updatedUSDCBalance.sub(USDC_BALANCE); // Calculate the amount of USDC paid
-  const feeAmount = paidAmount.mul(FEES); // Calculate the fee amount
+  const product = ETH_BALANCE.mul(USDC_BALANCE);
+  const updatedEthQuant = ETH_BALANCE.sub(quantityDecimal);
+  const updatedUSDCBalance = product.div(updatedEthQuant);
+  const paidAmount = updatedUSDCBalance.sub(USDC_BALANCE);
+  const feeAmount = paidAmount.mul(FEES);
 
   // Update the balances with the new values
   ETH_BALANCE = updatedEthQuant;
@@ -92,11 +89,11 @@ app.post("/sell-asset", authenticateToken, (req, res) => {
   }
 
   const quantityDecimal = new Decimal(quantity);
-  const updatedUSDCBalance = USDC_BALANCE.sub(quantityDecimal); // Calculate the updated USDC balance
+  const updatedUSDCBalance = USDC_BALANCE.sub(quantityDecimal);
   const product = ETH_BALANCE.mul(updatedUSDCBalance); // Calculate the constant product
-  const updatedEthQuant = product.div(USDC_BALANCE); // Calculate the updated ETH balance
-  const paidAmount = ETH_BALANCE.sub(updatedEthQuant); // Calculate the amount of ETH paid
-  const feeAmount = paidAmount.mul(FEES); // Calculate the fee amount
+  const updatedEthQuant = product.div(USDC_BALANCE);
+  const paidAmount = ETH_BALANCE.sub(updatedEthQuant);
+  const feeAmount = paidAmount.mul(FEES);
 
   // Update the balances with the new values
   ETH_BALANCE = updatedEthQuant.sub(feeAmount);
