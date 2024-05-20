@@ -6,7 +6,7 @@ import winston from "winston";
 
 const app = express();
 const PORT = 3000;
-const SECRET_KEY = "your_secret_key"; // Replace with your actual secret key
+const SECRET_KEY = "_";
 
 // Set up rate limiting to prevent abuse
 const limiter = rateLimit({
